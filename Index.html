@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Smart Tryout - Ganesha Operation</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .id-card-gradient { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); }
+        .pak-rei-gradient { background: linear-gradient(135deg, #0f172a 0%, #334155 100%); }
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .option-input:checked + .option-label { border-color: #2563eb; background-color: #eff6ff; }
+        .loading-spinner { border-top-color: transparent; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="min-h-screen text-slate-900 overflow-x-hidden">
+
+    <!-- Modal Konfirmasi Custom -->
+    <div id="custom-confirm" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/60 p-4">
+        <div class="bg-white rounded-[32px] p-8 max-w-sm w-full text-center shadow-2xl fade-in">
+            <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6 text-red-600 text-3xl">
+                <i class="fas fa-paper-plane"></i>
+            </div>
+            <h3 class="text-2xl font-black mb-2">Selesai Sekarang?</h3>
+            <p id="confirm-msg" class="text-gray-500 mb-8 text-sm">Pak Rei sudah siap menilai hasil kerja keras (atau kemalasan) kamu.</p>
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="closeConfirm()" class="py-4 bg-gray-100 text-gray-500 font-bold rounded-2xl">Batal</button>
+                <button onclick="executeFinish()" class="py-4 bg-blue-600 text-white font-bold rounded-2xl shadow-lg shadow-blue-200">Kumpul!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page: Registration -->
+    <div id="page-reg" class="min-h-screen flex flex-col items-center justify-center p-6">
+        <div id="form-container" class="w-full max-w-md bg-white p-8 rounded-[40px] shadow-2xl border border-gray-100 fade-in">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-blue-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <i class="fas fa-graduation-cap text-2xl"></i>
+                </div>
+                <h1 class="text-2xl font-black">Registrasi Peserta</h1>
+                <p class="text-sm text-gray-500">Materi TKA Bahasa Indonesia (Sukses SMP)</p>
+            </div>
+
+            <div class="space-y-6 mb-8">
+                <div>
+                    <label class="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Nama Lengkap</label>
+                    <input type="text" id="input-name" placeholder="Siapa namamu?" 
+                           class="w-full px-6 py-4 rounded-2xl bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none font-semibold transition-all">
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Upload Foto Profil</label>
+                    <div class="relative w-full h-44 border-2 border-dashed border-gray-200 rounded-[32px] flex flex-col items-center justify-center overflow-hidden bg-gray-50 group hover:border-blue-400 transition-all">
+                        <input type="file" id="input-photo" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-30">
+                        <div id="photo-empty" class="text-center z-10 p-4">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-300 mb-3"></i>
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Ketuk untuk pilih foto profil</p>
+                        </div>
+                        <img id="photo-preview" src="" class="hidden absolute inset-0 w-full h-full object-cover z-20">
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="generateCard()" class="w-full bg-blue-600 text-white font-bold py-5 rounded-[24px] shadow-xl hover:bg-blue-700 transition active:scale-95">
+                Generate Kartu Ujian
+            </button>
+        </div>
+
+        <div id="card-display" class="hidden w-full max-w-sm fade-in">
+            <div class="id-card-gradient p-8 rounded-[40px] text-white shadow-[0_20px_50px_rgba(30,58,138,0.3)] relative overflow-hidden">
+                <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+                <div class="flex justify-between items-center mb-8 border-b border-white/20 pb-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 bg-white rounded-full flex items-center justify-center text-blue-600 text-[10px] font-black">GO</div>
+                        <h2 class="text-xs font-black tracking-widest uppercase italic">Smart Tryout</h2>
+                    </div>
+                    <i class="fas fa-qrcode text-xl opacity-40"></i>
+                </div>
+                <div class="flex gap-6 items-center">
+                    <div class="w-24 h-32 bg-white/20 rounded-2xl overflow-hidden border border-white/30 shrink-0 shadow-inner flex items-center justify-center">
+                        <img id="card-photo-img" src="" class="hidden w-full h-full object-cover">
+                        <i id="card-photo-icon" class="fas fa-user-tie text-4xl opacity-30"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[10px] font-bold opacity-60 uppercase mb-1">Peserta Ujian</p>
+                        <h3 id="card-name-text" class="text-xl font-black truncate leading-tight">NAMA</h3>
+                        <div class="mt-4 space-y-1">
+                            <p class="text-[9px] font-mono opacity-80 uppercase">ID: <span id="card-id" class="font-bold">GO-0000</span></p>
+                            <p class="text-[9px] font-mono opacity-80 uppercase">Status: <span class="text-green-300 font-bold">Terverifikasi</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button onclick="startAiProcess()" class="mt-8 w-full pak-rei-gradient text-white font-bold py-5 rounded-[24px] shadow-2xl hover:scale-[1.02] transition active:scale-95">
+                Mulai Ujian Bersama Pak Rei <i class="fas fa-chevron-right ml-2"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Page: Loading AI -->
+    <div id="page-loading" class="hidden min-h-screen flex flex-col items-center justify-center p-8 bg-white text-center">
+        <div class="w-20 h-20 border-4 border-blue-600 rounded-full loading-spinner mb-8"></div>
+        <h2 class="text-2xl font-black text-slate-800" id="loading-text">Menyusun Materi TKA...</h2>
+        <p class="text-sm text-gray-400 mt-2 max-w-xs leading-relaxed">Pak Rei sedang mengambil bank soal Bahasa Indonesia dari halaman 15-69 buku panduan.</p>
+    </div>
+
+    <!-- Page: Exam -->
+    <div id="page-exam" class="hidden min-h-screen flex flex-col bg-gray-50">
+        <header class="bg-white border-b border-gray-100 p-4 flex justify-between items-center sticky top-0 z-50">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl overflow-hidden border-2 border-blue-500 shadow-sm bg-gray-100 flex items-center justify-center">
+                    <img id="nav-pp" src="" class="hidden w-full h-full object-cover">
+                    <i id="nav-pp-icon" class="fas fa-user text-gray-300"></i>
+                </div>
+                <div class="flex flex-col">
+                    <span id="nav-user" class="font-black text-sm text-slate-800 leading-none truncate max-w-[120px]">User</span>
+                    <span class="text-[9px] font-bold text-gray-400 uppercase mt-1 tracking-tighter">Tryout TKA SMP</span>
+                </div>
+            </div>
+            <div class="flex flex-col items-center">
+                <div class="bg-red-50 text-red-600 px-4 py-1.5 rounded-2xl font-mono font-bold text-xs border border-red-100 shadow-inner" id="timer">90:00</div>
+                <div id="bg-load-status" class="text-[7px] font-black text-blue-500 mt-1 uppercase hidden animate-pulse">Syncing Next Questions...</div>
+            </div>
+            <button onclick="openConfirm()" class="bg-slate-900 text-white px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition">Kumpul</button>
+        </header>
+        
+        <main class="flex-1 p-6 max-w-2xl mx-auto w-full overflow-y-auto custom-scrollbar">
+            <div class="mb-6 flex justify-between items-end">
+                <div>
+                    <p class="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] mb-1">Kemajuan Ujian</p>
+                    <div class="text-[11px] font-black text-slate-800 uppercase tracking-tighter">SOAL <span id="q-idx" class="text-blue-600 text-xl">1</span> / <span id="q-total" class="text-gray-400">30</span></div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    <span class="text-[9px] font-black text-gray-500 uppercase tracking-widest">LIVE AI SYSTEM</span>
+                </div>
+            </div>
+            
+            <div class="bg-white p-8 md:p-10 rounded-[40px] shadow-sm border border-gray-100 mb-8 min-h-[350px] flex flex-col relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-[0.03] text-8xl pointer-events-none">
+                    <i class="fas fa-quote-right"></i>
+                </div>
+                <p id="q-text" class="text-slate-800 font-semibold text-lg leading-relaxed mb-10 relative z-10">Mempersiapkan soal...</p>
+                <div id="q-options" class="space-y-3.5 mt-auto relative z-10"></div>
+            </div>
+            
+            <div class="flex gap-4 mb-10">
+                <button onclick="changeQ(-1)" id="btn-prev" class="flex-1 bg-white border border-gray-200 py-5 rounded-[24px] font-bold text-gray-400 transition hover:bg-gray-50 active:scale-95">Kembali</button>
+                <button onclick="changeQ(1)" id="btn-next" class="flex-1 bg-blue-600 text-white py-5 rounded-[24px] font-bold shadow-xl shadow-blue-100 hover:bg-blue-700 transition active:scale-95">Lanjut</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Page: Result with Pak Rei Analysis -->
+    <div id="page-result" class="hidden min-h-screen bg-slate-50 p-4 md:p-10 flex flex-col items-center">
+        <div class="max-w-4xl w-full">
+            <!-- Header Kartu Hasil -->
+            <div class="bg-white rounded-[40px] shadow-2xl overflow-hidden mb-8 border border-gray-100 flex flex-col md:flex-row">
+                <div class="pak-rei-gradient p-10 md:w-1/3 flex flex-col items-center justify-center text-white text-center">
+                    <div class="w-32 h-32 rounded-[32px] overflow-hidden border-4 border-white/20 shadow-2xl mb-6 bg-slate-800">
+                        <img id="res-pp" src="" class="hidden w-full h-full object-cover">
+                        <i id="res-pp-icon" class="fas fa-user-graduate text-5xl text-white/20 mt-8"></i>
+                    </div>
+                    <h2 id="res-name" class="text-2xl font-black mb-1 truncate w-full px-4 text-white">NAMA</h2>
+                    <p class="text-[10px] font-bold opacity-60 uppercase tracking-[0.2em] mb-6">Sertifikat Hasil AI</p>
+                    <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 w-full border border-white/10">
+                        <p class="text-[10px] font-bold opacity-60 uppercase mb-1">Skor Akhir</p>
+                        <div id="res-score" class="text-6xl font-black text-white">0</div>
+                    </div>
+                </div>
+                
+                <div class="flex-1 p-10">
+                    <div class="flex justify-between items-center mb-8">
+                        <div>
+                            <h3 class="text-2xl font-black text-slate-800 italic">Laporan Analisis Pak Rei</h3>
+                            <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Data dikumpulkan secara real-time</p>
+                        </div>
+                        <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
+                            <i class="fas fa-microchip"></i>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-gray-100">
+                            <p class="text-[9px] font-bold text-gray-400 uppercase mb-1">Benar</p>
+                            <p id="res-correct" class="text-xl font-black text-green-600">0</p>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-gray-100">
+                            <p class="text-[9px] font-bold text-gray-400 uppercase mb-1">Salah</p>
+                            <p id="res-wrong" class="text-xl font-black text-red-600">0</p>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-gray-100">
+                            <p class="text-[9px] font-bold text-gray-400 uppercase mb-1">Waktu</p>
+                            <p id="res-time" class="text-xl font-black text-slate-700">0m</p>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-gray-100">
+                            <p class="text-[9px] font-bold text-gray-400 uppercase mb-1">Status</p>
+                            <p id="res-rank" class="text-[11px] font-black text-blue-600 uppercase">N/A</p>
+                        </div>
+                    </div>
+
+                    <!-- Kotak Pesan Pak Rei -->
+                    <div class="bg-slate-900 rounded-[32px] p-6 text-white relative mb-6 shadow-xl">
+                        <div class="absolute -top-3 left-8 bg-blue-600 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shadow-lg">Pak Rei (Guru AI Frontal)</div>
+                        <p id="pak-rei-speech" class="text-sm leading-relaxed text-slate-300 italic">"Gue lagi ngumpulin data pengerjaan lo... Sebentar, jangan kabur dulu."</p>
+                        <div id="analysis-loading" class="mt-4 flex items-center gap-2 text-[10px] font-bold text-blue-400 uppercase">
+                            <i class="fas fa-circle-notch fa-spin"></i> Menganalisis Kebodohan & Kecerdasan...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rangkuman Materi -->
+            <div class="bg-white rounded-[40px] p-10 shadow-xl border border-gray-100 mb-10">
+                <h4 class="text-xl font-black text-slate-800 mb-6 flex items-center gap-3">
+                    <i class="fas fa-book-open text-blue-600"></i> Bedah Materi Salah
+                </h4>
+                <div id="material-summary" class="space-y-4">
+                    <!-- Rangkuman otomatis masuk sini -->
+                    <p class="text-sm text-gray-400 italic">Selesaikan ujian untuk melihat rangkuman perbaikan materi.</p>
+                </div>
+            </div>
+
+            <button onclick="location.reload()" class="w-full bg-slate-900 text-white font-bold py-5 rounded-[24px] shadow-2xl hover:bg-black transition active:scale-95 mb-10">Tantang Pak Rei Lagi</button>
+        </div>
+    </div>
+
+    <script>
+        const apiKey = ""; 
+        let userData = { name: "", photo: null };
+        let questions = [];
+        let answers = [];
+        let currentIdx = 0;
+        let startTime, endTime;
+        let timerSeconds = 90 * 60; 
+        let totalTarget = 30;
+        let isFetchingNext = false;
+        let intervalTimer;
+
+        // --- PP HANDLER ---
+        document.getElementById('input-photo').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    userData.photo = ev.target.result;
+                    document.getElementById('photo-preview').src = userData.photo;
+                    document.getElementById('photo-preview').classList.remove('hidden');
+                    document.getElementById('photo-empty').classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function generateCard() {
+            const name = document.getElementById('input-name').value.trim();
+            if (!name) return alert("Woy, nama jangan dikosongin!");
+            userData.name = name;
+            
+            document.getElementById('form-container').classList.add('hidden');
+            document.getElementById('card-display').classList.remove('hidden');
+            
+            document.getElementById('card-name-text').innerText = name.toUpperCase();
+            document.getElementById('card-id').innerText = "GO-" + Math.floor(1000 + Math.random() * 8999);
+            
+            if (userData.photo) {
+                const cardImg = document.getElementById('card-photo-img');
+                cardImg.src = userData.photo;
+                cardImg.classList.remove('hidden');
+                document.getElementById('card-photo-icon').classList.add('hidden');
+            }
+        }
+
+        // --- AI FETCH SYSTEM ---
+        async function fetchQuestions(batch) {
+            const prompt = `Berperanlah sebagai sistem Ganesha Operation. Buat 10 soal TKA Bahasa Indonesia SMP Pilihan Ganda (Batch ${batch}). 
+            Gunakan referensi gaya soal dari buku Sukses TKA (Halaman 15-69) meliputi: Ide Pokok, Teks Berita, Kalimat Efektif, EYD, Majas, dan Simpulan.
+            Soal harus menantang dan sesuai standar kurikulum.
+            OUTPUT HARUS JSON MURNI: {"questions": [{"text": "Isi soal", "options": ["A", "B", "C", "D"], "answer": 0, "topic": "Topik Materi"}]}`;
+            
+            try {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json" } })
+                });
+                const data = await res.json();
+                const clean = JSON.parse(data.candidates[0].content.parts[0].text);
+                return clean.questions;
+            } catch (e) { return null; }
+        }
+
+        async function startAiProcess() {
+            document.getElementById('page-reg').classList.add('hidden');
+            document.getElementById('page-loading').classList.remove('hidden');
+
+            const firstBatch = await fetchQuestions(1);
+            if (!firstBatch) {
+                alert("AI Pak Rei lagi ngopi, gagal ambil soal. Coba lagi!");
+                location.reload();
+                return;
+            }
+
+            questions = firstBatch;
+            answers = new Array(totalTarget).fill(null);
+            startTime = new Date();
+
+            // Set PP di UI Ujian
+            if(userData.photo) {
+                const navPp = document.getElementById('nav-pp');
+                navPp.src = userData.photo;
+                navPp.classList.remove('hidden');
+                document.getElementById('nav-pp-icon').classList.add('hidden');
+            }
+
+            document.getElementById('nav-user').innerText = userData.name;
+            document.getElementById('page-loading').classList.add('hidden');
+            document.getElementById('page-exam').classList.remove('hidden');
+            
+            initTimer();
+            renderQuestion();
+        }
+
+        async function checkBgLoad() {
+            if (isFetchingNext) return;
+            if (currentIdx >= 4 && questions.length === 10) triggerBatch(2);
+            else if (currentIdx >= 14 && questions.length === 20) triggerBatch(3);
+        }
+
+        async function triggerBatch(b) {
+            isFetchingNext = true;
+            document.getElementById('bg-load-status').classList.remove('hidden');
+            const next = await fetchQuestions(b);
+            if (next) questions = [...questions, ...next];
+            isFetchingNext = false;
+            document.getElementById('bg-load-status').classList.add('hidden');
+        }
+
+        // --- EXAM ENGINE ---
+        function renderQuestion() {
+            checkBgLoad();
+            const q = questions[currentIdx];
+            if (!q) {
+                document.getElementById('q-text').innerText = "Pak Rei lagi nulis soal berikutnya... Tunggu 2 detik.";
+                document.getElementById('q-options').innerHTML = "";
+                setTimeout(renderQuestion, 2000);
+                return;
+            }
+
+            document.getElementById('q-idx').innerText = currentIdx + 1;
+            document.getElementById('q-text').innerText = q.text;
+            
+            const box = document.getElementById('q-options');
+            box.innerHTML = "";
+            q.options.forEach((opt, i) => {
+                const isChecked = answers[currentIdx] === i;
+                box.innerHTML += `
+                    <label class="block cursor-pointer">
+                        <input type="radio" name="opt" class="hidden option-input" onchange="answers[${currentIdx}]=${i}" ${isChecked ? 'checked' : ''}>
+                        <div class="option-label border-2 border-gray-100 p-5 rounded-3xl flex items-center gap-4 transition-all hover:bg-slate-50 shadow-sm">
+                            <div class="w-9 h-9 rounded-2xl bg-gray-100 flex items-center justify-center font-black text-gray-400 text-xs">${['A','B','C','D'][i]}</div>
+                            <span class="text-[13px] font-bold text-slate-700">${opt}</span>
+                        </div>
+                    </label>
+                `;
+            });
+
+            document.getElementById('btn-prev').disabled = currentIdx === 0;
+            document.getElementById('btn-prev').style.opacity = currentIdx === 0 ? "0.3" : "1";
+            document.getElementById('btn-next').innerText = currentIdx === totalTarget - 1 ? "Kumpul" : "Lanjut";
+        }
+
+        function changeQ(dir) {
+            if (dir === 1 && currentIdx === totalTarget - 1) return openConfirm();
+            currentIdx += dir;
+            renderQuestion();
+        }
+
+        // --- PAK REI ANALYSIS LOGIC ---
+        async function getPakReiAnalysis(score, correct, timeUsed, mistakes) {
+            const mistakesList = mistakes.map(m => m.topic).join(", ");
+            const prompt = `Analisis hasil ujian siswa ini:
+            Nama: ${userData.name}
+            Skor: ${score}/100
+            Benar: ${correct}/30 soal
+            Waktu pengerjaan: ${timeUsed} menit
+            Materi yang salah: ${mistakesList}
+            
+            Tugasmu (Pak Rei):
+            1. Berikan komentar evaluasi dengan gaya bahasa JUJUR, FRONTAL, sedikit pedas tapi membangun. Pakai "Gue/Lo" atau bahasa santai tapi tegas.
+            2. Berikan rangkuman materi perbaikan untuk topik yang salah (maksimal 3 topik utama).
+            
+            Format OUTPUT JSON: 
+            {"comment": "Isi komentar Pak Rei", "summaries": [{"topic": "Judul Materi", "explanation": "Penjelasan singkat & tips perbaikan"}]}`;
+
+            try {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json" } })
+                });
+                const data = await res.json();
+                return JSON.parse(data.candidates[0].content.parts[0].text);
+            } catch (e) {
+                return { comment: "Waduh, koneksi gue putus. Intinya lo harus belajar lagi!", summaries: [] };
+            }
+        }
+
+        function executeFinish() {
+            closeConfirm();
+            document.getElementById('page-exam').classList.add('hidden');
+            document.getElementById('page-result').classList.remove('hidden');
+            
+            endTime = new Date();
+            const diffMs = endTime - startTime;
+            const mins = Math.floor(diffMs / 60000);
+            
+            let correct = 0;
+            let mistakes = [];
+            questions.forEach((q, i) => {
+                if (answers[i] === q.answer) correct++;
+                else mistakes.push({ topic: q.topic || "Umum", text: q.text });
+            });
+
+            const score = Math.round((correct / totalTarget) * 100);
+            
+            // Set UI Dasar
+            document.getElementById('res-name').innerText = userData.name;
+            document.getElementById('res-score').innerText = score;
+            document.getElementById('res-correct').innerText = correct;
+            document.getElementById('res-wrong').innerText = totalTarget - correct;
+            document.getElementById('res-time').innerText = mins + "m";
+            
+            const rank = score >= 90 ? "Jenius" : score >= 75 ? "Okelah" : score >= 50 ? "Biasa Saja" : "Parah";
+            document.getElementById('res-rank').innerText = rank;
+
+            // Set PP di Result
+            if(userData.photo) {
+                const resPp = document.getElementById('res-pp');
+                resPp.src = userData.photo;
+                resPp.classList.remove('hidden');
+                document.getElementById('res-pp-icon').classList.add('hidden');
+            }
+
+            // Panggil Pak Rei
+            getPakReiAnalysis(score, correct, mins, mistakes).then(data => {
+                document.getElementById('pak-rei-speech').innerText = `"${data.comment}"`;
+                document.getElementById('analysis-loading').classList.add('hidden');
+                
+                const summaryBox = document.getElementById('material-summary');
+                summaryBox.innerHTML = "";
+                if(data.summaries.length > 0) {
+                    data.summaries.forEach(s => {
+                        summaryBox.innerHTML += `
+                            <div class="p-5 rounded-3xl bg-blue-50 border border-blue-100">
+                                <h5 class="font-black text-blue-700 uppercase text-[10px] tracking-widest mb-2">${s.topic}</h5>
+                                <p class="text-xs text-slate-600 leading-relaxed">${s.explanation}</p>
+                            </div>
+                        `;
+                    });
+                } else {
+                    summaryBox.innerHTML = `<p class="text-sm text-green-600 font-bold italic">Gak ada materi salah. Lo ngerjain sendiri apa nyontek?</p>`;
+                }
+            });
+        }
+
+        // --- UTILS ---
+        function initTimer() {
+            intervalTimer = setInterval(() => {
+                if (timerSeconds > 0) {
+                    timerSeconds--;
+                    let m = Math.floor(timerSeconds/60).toString().padStart(2, '0');
+                    let s = (timerSeconds%60).toString().padStart(2, '0');
+                    document.getElementById('timer').innerText = `${m}:${s}`;
+                }
+            }, 1000);
+        }
+
+        function openConfirm() { document.getElementById('custom-confirm').classList.remove('hidden'); }
+        function closeConfirm() { document.getElementById('custom-confirm').classList.add('hidden'); }
+    </script>
+</body>
+</html>
+

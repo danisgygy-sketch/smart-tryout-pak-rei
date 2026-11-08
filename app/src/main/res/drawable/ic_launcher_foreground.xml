@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Academic Shield & Graduation Cap with Radar Star Emblem inside 66dp safe zone -->
+    <path
+        android:fillColor="#38BDF8"
+        android:pathData="M54,24L26,37L54,50L77,39.3V56H82V37L54,24ZM35,46.8V61.2C35,68.6 43.1,75.4 54,78C64.9,75.4 73,68.6 73,61.2V46.8L54,55.6L35,46.8Z" />
+    <path
+        android:fillColor="#FACC15"
+        android:pathData="M54,60L57.2,66.5L64.4,67.5L59.2,72.6L60.4,79.8L54,76.4L47.6,79.8L48.8,72.6L43.6,67.5L50.8,66.5L54,60Z" />
+</vector>

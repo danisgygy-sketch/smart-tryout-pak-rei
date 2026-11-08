@@ -1,0 +1,156 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User account profile and authentication metadata automatically persisted on every login or registration.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID" },
+        "email": { "type": "string", "description": "User email address" },
+        "displayName": { "type": "string", "description": "User full name" },
+        "authMethod": { "type": "string", "description": "Authentication provider used: google | email | facebook" },
+        "nisn": { "type": "string", "description": "Student NISN or registration identification number" },
+        "institution": { "type": "string", "description": "School or educational institution name" },
+        "gradeClass": { "type": "string", "description": "Student current grade or class level" },
+        "photoBase64": { "type": "string", "description": "Compressed profile avatar JPEG encoded as Base64" },
+        "loginCount": { "type": "integer", "description": "Total number of recorded logins" },
+        "lastLoginAt": { "type": "timestamp", "description": "Server timestamp of most recent login" },
+        "createdAt": { "type": "timestamp", "description": "Server timestamp of first registration" },
+        "updatedAt": { "type": "timestamp", "description": "Server timestamp of last profile update" }
+      },
+      "required": [
+        "userId", "email", "displayName", "authMethod", "institution",
+        "loginCount", "lastLoginAt", "createdAt", "updatedAt"
+      ]
+    },
+    "LoginHistoryRecord": {
+      "title": "LoginHistoryRecord",
+      "description": "Audit record of each user sign-in or registration event persisted automatically in Firestore.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID" },
+        "email": { "type": "string", "description": "Email used during login" },
+        "displayName": { "type": "string", "description": "Display name at login time" },
+        "authMethod": { "type": "string", "description": "Authentication method: google | email | facebook" },
+        "deviceInfo": { "type": "string", "description": "Android device model and OS version" },
+        "createdAt": { "type": "timestamp", "description": "Server timestamp of login event" }
+      },
+      "required": [
+        "userId", "email", "displayName", "authMethod", "deviceInfo", "createdAt"
+      ]
+    },
+    "ActiveExamSession": {
+      "title": "ActiveExamSession",
+      "description": "In-progress tryout exam session synchronized across the user's devices.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID" },
+        "appMode": { "type": "string", "description": "Evaluation mode: nasional | reverse | internasional | bk" },
+        "participantName": { "type": "string", "description": "Name of the student taking the tryout" },
+        "frameworkKey": { "type": "string", "description": "Curriculum framework identifier" },
+        "frameworkName": { "type": "string", "description": "Human-readable curriculum framework name" },
+        "stage": { "type": "string", "description": "Educational stage / grade level" },
+        "subjectName": { "type": "string", "description": "Subject or assessment domain name" },
+        "topicFocus": { "type": "string", "description": "Optional topic focus string" },
+        "difficultyCode": { "type": "string", "description": "Standar or HOTS" },
+        "scoringMethod": { "type": "string", "description": "polytomous or strict" },
+        "lang": { "type": "string", "description": "Language code id or en" },
+        "durationMinutes": { "type": "integer", "description": "Allocated duration in minutes" },
+        "totalTarget": { "type": "integer", "description": "Target total number of questions" },
+        "currentIdx": { "type": "integer", "description": "Current active question index" },
+        "timerSeconds": { "type": "integer", "description": "Remaining countdown timer in seconds" },
+        "questionsPayload": { "type": "string", "description": "Serialized JSON array of generated QuestionItem objects" },
+        "answersPayload": { "type": "string", "description": "Serialized JSON array of student answers" },
+        "doubtsPayload": { "type": "string", "description": "Serialized JSON array of doubt flags" },
+        "createdAt": { "type": "timestamp", "description": "Creation server timestamp" },
+        "updatedAt": { "type": "timestamp", "description": "Last update server timestamp" }
+      },
+      "required": [
+        "userId", "appMode", "participantName", "frameworkKey", "frameworkName",
+        "stage", "subjectName", "topicFocus", "difficultyCode", "scoringMethod",
+        "lang", "durationMinutes", "totalTarget", "currentIdx", "timerSeconds",
+        "questionsPayload", "answersPayload", "doubtsPayload", "createdAt", "updatedAt"
+      ]
+    },
+    "ExamResultRecord": {
+      "title": "ExamResultRecord",
+      "description": "Completed exam diagnostic report, ability index, radar stats, and ZPD summary.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID" },
+        "appMode": { "type": "string", "description": "Evaluation mode" },
+        "participantName": { "type": "string", "description": "Student name" },
+        "frameworkKey": { "type": "string", "description": "Curriculum key" },
+        "frameworkName": { "type": "string", "description": "Curriculum display name" },
+        "stage": { "type": "string", "description": "Grade/Stage" },
+        "subjectName": { "type": "string", "description": "Subject name" },
+        "scoringMethod": { "type": "string", "description": "polytomous or strict" },
+        "scorePercent": { "type": "integer", "description": "Final percentage score 0..100" },
+        "earnedPoints": { "type": "number", "description": "Polytomous points earned" },
+        "maxPoints": { "type": "number", "description": "Maximum possible points" },
+        "abilityIndexScore": { "type": "integer", "description": "Estimated Ability Index (200..800 scale)" },
+        "logitIndex": { "type": "number", "description": "Estimated Logit (-3.00 to +3.00)" },
+        "scaleBadge": { "type": "string", "description": "Equivalent scale badge text" },
+        "scaleDisclaimer": { "type": "string", "description": "Psychometric scale disclaimer" },
+        "durationTakenMinutes": { "type": "integer", "description": "Elapsed time in minutes" },
+        "pakReiComment": { "type": "string", "description": "AI diagnostic mentor commentary" },
+        "radarPayload": { "type": "string", "description": "Serialized JSON of cognitive/dimension stats" },
+        "topicPayload": { "type": "string", "description": "Serialized JSON of topic mastery stats" },
+        "summariesPayload": { "type": "string", "description": "Serialized JSON of Pak Rei remediation cards" },
+        "reviewPayload": { "type": "string", "description": "Serialized JSON of question review items" },
+        "createdAt": { "type": "timestamp", "description": "Completion server timestamp" },
+        "updatedAt": { "type": "timestamp", "description": "Update server timestamp" }
+      },
+      "required": [
+        "userId", "appMode", "participantName", "frameworkKey", "frameworkName",
+        "stage", "subjectName", "scoringMethod", "scorePercent", "earnedPoints",
+        "maxPoints", "abilityIndexScore", "logitIndex", "scaleBadge", "scaleDisclaimer",
+        "durationTakenMinutes", "pakReiComment", "radarPayload", "topicPayload",
+        "summariesPayload", "reviewPayload", "createdAt", "updatedAt"
+      ]
+    },
+    "SavedBlueprintRecord": {
+      "title": "SavedBlueprintRecord",
+      "description": "Reverse-engineered PDF exam blueprint saved to the user's cloud library.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID" },
+        "title": { "type": "string", "description": "Blueprint title" },
+        "detectedSubject": { "type": "string", "description": "Detected subject name" },
+        "frameworkKey": { "type": "string", "description": "Target curriculum framework key" },
+        "stage": { "type": "string", "description": "Target educational stage" },
+        "styleDNA": { "type": "string", "description": "Extracted question style DNA" },
+        "totalItemsCount": { "type": "integer", "description": "Total questions in blueprint" },
+        "itemsPayload": { "type": "string", "description": "Serialized JSON array of BlueprintRow items" },
+        "createdAt": { "type": "timestamp", "description": "Creation server timestamp" },
+        "updatedAt": { "type": "timestamp", "description": "Update server timestamp" }
+      },
+      "required": [
+        "userId", "title", "detectedSubject", "frameworkKey", "stage",
+        "styleDNA", "totalItemsCount", "itemsPayload", "createdAt", "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "User profile and authentication summary document."
+    },
+    "/users/{userId}/login_logs/{logId}": {
+      "schema": { "$ref": "#/entities/LoginHistoryRecord" },
+      "description": "User login audit history subcollection."
+    },
+    "/users/{userId}/active_sessions/{sessionId}": {
+      "schema": { "$ref": "#/entities/ActiveExamSession" },
+      "description": "User-scoped active exam session documents."
+    },
+    "/users/{userId}/exam_results/{resultId}": {
+      "schema": { "$ref": "#/entities/ExamResultRecord" },
+      "description": "User-scoped completed exam diagnostic reports."
+    },
+    "/users/{userId}/blueprints/{blueprintId}": {
+      "schema": { "$ref": "#/entities/SavedBlueprintRecord" },
+      "description": "User-scoped saved PDF reverse engineering blueprints."
+    }
+  }
+}

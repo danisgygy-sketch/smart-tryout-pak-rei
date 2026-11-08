@@ -1,0 +1,191 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidUserProfile(data, userId) {
+      let requiredKeys = [
+        'userId', 'email', 'displayName', 'authMethod', 'institution',
+        'loginCount', 'lastLoginAt', 'createdAt', 'updatedAt'
+      ];
+      let allowedKeys = [
+        'userId', 'email', 'displayName', 'authMethod', 'nisn', 'institution',
+        'gradeClass', 'photoBase64', 'loginCount', 'lastLoginAt', 'createdAt', 'updatedAt'
+      ];
+      return data.keys().hasAll(requiredKeys)
+        && data.keys().hasOnly(allowedKeys)
+        && data.userId is string && data.userId == userId
+        && data.email is string && data.email.size() <= 200
+        && data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 150
+        && data.authMethod is string && data.authMethod in ['google', 'email', 'facebook']
+        && data.institution is string && data.institution.size() <= 200
+        && (!('nisn' in data) || (data.nisn is string && data.nisn.size() <= 40))
+        && (!('gradeClass' in data) || (data.gradeClass is string && data.gradeClass.size() <= 120))
+        && (!('photoBase64' in data) || (data.photoBase64 is string && data.photoBase64.size() <= 150000))
+        && data.loginCount is int && data.loginCount >= 1 && data.loginCount <= 1000000
+        && data.lastLoginAt is timestamp
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidLoginLog(data, userId) {
+      let allowedKeys = [
+        'userId', 'email', 'displayName', 'authMethod', 'deviceInfo', 'createdAt'
+      ];
+      return data.keys().hasAll(allowedKeys)
+        && data.keys().hasOnly(allowedKeys)
+        && data.userId is string && data.userId == userId
+        && data.email is string && data.email.size() <= 200
+        && data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 150
+        && data.authMethod is string && data.authMethod in ['google', 'email', 'facebook']
+        && data.deviceInfo is string && data.deviceInfo.size() <= 200
+        && data.createdAt is timestamp;
+    }
+
+    function isValidActiveSession(data, userId) {
+      let allowedKeys = [
+        'userId', 'appMode', 'participantName', 'frameworkKey', 'frameworkName',
+        'stage', 'subjectName', 'topicFocus', 'difficultyCode', 'scoringMethod',
+        'lang', 'durationMinutes', 'totalTarget', 'currentIdx', 'timerSeconds',
+        'questionsPayload', 'answersPayload', 'doubtsPayload', 'createdAt', 'updatedAt'
+      ];
+      return data.keys().hasAll(allowedKeys)
+        && data.keys().hasOnly(allowedKeys)
+        && data.userId is string && data.userId == userId
+        && data.appMode is string && data.appMode.size() >= 2 && data.appMode.size() <= 40
+        && data.participantName is string && data.participantName.size() >= 1 && data.participantName.size() <= 150
+        && data.frameworkKey is string && data.frameworkKey.size() >= 1 && data.frameworkKey.size() <= 60
+        && data.frameworkName is string && data.frameworkName.size() <= 200
+        && data.stage is string && data.stage.size() <= 200
+        && data.subjectName is string && data.subjectName.size() <= 200
+        && data.topicFocus is string && data.topicFocus.size() <= 300
+        && data.difficultyCode is string && data.difficultyCode.size() <= 40
+        && data.scoringMethod is string && data.scoringMethod.size() <= 40
+        && data.lang is string && data.lang.size() <= 10
+        && data.durationMinutes is int && data.durationMinutes >= 1 && data.durationMinutes <= 300
+        && data.totalTarget is int && data.totalTarget >= 1 && data.totalTarget <= 100
+        && data.currentIdx is int && data.currentIdx >= 0 && data.currentIdx <= 100
+        && data.timerSeconds is int && data.timerSeconds >= 0 && data.timerSeconds <= 36000
+        && data.questionsPayload is string && data.questionsPayload.size() <= 600000
+        && data.answersPayload is string && data.answersPayload.size() <= 200000
+        && data.doubtsPayload is string && data.doubtsPayload.size() <= 50000
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidExamResult(data, userId) {
+      let allowedKeys = [
+        'userId', 'appMode', 'participantName', 'frameworkKey', 'frameworkName',
+        'stage', 'subjectName', 'scoringMethod', 'scorePercent', 'earnedPoints',
+        'maxPoints', 'abilityIndexScore', 'logitIndex', 'scaleBadge', 'scaleDisclaimer',
+        'durationTakenMinutes', 'pakReiComment', 'radarPayload', 'topicPayload',
+        'summariesPayload', 'reviewPayload', 'createdAt', 'updatedAt'
+      ];
+      return data.keys().hasAll(allowedKeys)
+        && data.keys().hasOnly(allowedKeys)
+        && data.userId is string && data.userId == userId
+        && data.appMode is string && data.appMode.size() >= 2 && data.appMode.size() <= 40
+        && data.participantName is string && data.participantName.size() >= 1 && data.participantName.size() <= 150
+        && data.frameworkKey is string && data.frameworkKey.size() >= 1 && data.frameworkKey.size() <= 60
+        && data.frameworkName is string && data.frameworkName.size() <= 200
+        && data.stage is string && data.stage.size() <= 200
+        && data.subjectName is string && data.subjectName.size() <= 200
+        && data.scoringMethod is string && data.scoringMethod.size() <= 40
+        && data.scorePercent is int && data.scorePercent >= 0 && data.scorePercent <= 100
+        && (data.earnedPoints is int || data.earnedPoints is float)
+        && (data.maxPoints is int || data.maxPoints is float)
+        && data.abilityIndexScore is int && data.abilityIndexScore >= 100 && data.abilityIndexScore <= 900
+        && (data.logitIndex is int || data.logitIndex is float)
+        && data.scaleBadge is string && data.scaleBadge.size() <= 250
+        && data.scaleDisclaimer is string && data.scaleDisclaimer.size() <= 500
+        && data.durationTakenMinutes is int && data.durationTakenMinutes >= 0 && data.durationTakenMinutes <= 500
+        && data.pakReiComment is string && data.pakReiComment.size() <= 5000
+        && data.radarPayload is string && data.radarPayload.size() <= 100000
+        && data.topicPayload is string && data.topicPayload.size() <= 100000
+        && data.summariesPayload is string && data.summariesPayload.size() <= 100000
+        && data.reviewPayload is string && data.reviewPayload.size() <= 600000
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidBlueprint(data, userId) {
+      let allowedKeys = [
+        'userId', 'title', 'detectedSubject', 'frameworkKey', 'stage',
+        'styleDNA', 'totalItemsCount', 'itemsPayload', 'createdAt', 'updatedAt'
+      ];
+      return data.keys().hasAll(allowedKeys)
+        && data.keys().hasOnly(allowedKeys)
+        && data.userId is string && data.userId == userId
+        && data.title is string && data.title.size() >= 1 && data.title.size() <= 200
+        && data.detectedSubject is string && data.detectedSubject.size() <= 200
+        && data.frameworkKey is string && data.frameworkKey.size() <= 60
+        && data.stage is string && data.stage.size() <= 200
+        && data.styleDNA is string && data.styleDNA.size() <= 4000
+        && data.totalItemsCount is int && data.totalItemsCount >= 1 && data.totalItemsCount <= 100
+        && data.itemsPayload is string && data.itemsPayload.size() <= 200000
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId) && resource.data.userId == request.auth.uid;
+      allow create: if isOwner(userId) && isValidUserProfile(request.resource.data, userId);
+      allow update: if isOwner(userId)
+                    && resource != null
+                    && isValidUserProfile(request.resource.data, userId)
+                    && request.resource.data.userId == resource.data.userId;
+      allow delete: if isOwner(userId) && resource != null;
+
+      match /login_logs/{logId} {
+        allow get: if isOwner(userId);
+        allow list: if isOwner(userId) && resource.data.userId == request.auth.uid;
+        allow create: if isOwner(userId) && isValidLoginLog(request.resource.data, userId);
+        allow update: if false;
+        allow delete: if isOwner(userId) && resource != null;
+      }
+
+      match /active_sessions/{sessionId} {
+        allow get: if isOwner(userId);
+        allow list: if isOwner(userId) && resource.data.userId == request.auth.uid;
+        allow create: if isOwner(userId) && isValidActiveSession(request.resource.data, userId);
+        allow update: if isOwner(userId)
+                      && resource != null
+                      && isValidActiveSession(request.resource.data, userId)
+                      && request.resource.data.userId == resource.data.userId;
+        allow delete: if isOwner(userId) && resource != null;
+      }
+
+      match /exam_results/{resultId} {
+        allow get: if isOwner(userId);
+        allow list: if isOwner(userId) && resource.data.userId == request.auth.uid;
+        allow create: if isOwner(userId) && isValidExamResult(request.resource.data, userId);
+        allow update: if isOwner(userId)
+                      && resource != null
+                      && isValidExamResult(request.resource.data, userId)
+                      && request.resource.data.userId == resource.data.userId
+                      && request.resource.data.createdAt == resource.data.createdAt;
+        allow delete: if isOwner(userId) && resource != null;
+      }
+
+      match /blueprints/{blueprintId} {
+        allow get: if isOwner(userId);
+        allow list: if isOwner(userId) && resource.data.userId == request.auth.uid;
+        allow create: if isOwner(userId) && isValidBlueprint(request.resource.data, userId);
+        allow update: if isOwner(userId)
+                      && resource != null
+                      && isValidBlueprint(request.resource.data, userId)
+                      && request.resource.data.userId == resource.data.userId
+                      && request.resource.data.createdAt == resource.data.createdAt;
+        allow delete: if isOwner(userId) && resource != null;
+      }
+    }
+  }
+}

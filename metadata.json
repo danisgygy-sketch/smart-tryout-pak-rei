@@ -1,0 +1,6 @@
+{
+  "name": "Smart Tryout Pak Rei",
+  "description": "Platform asesmen adaptif AI dengan Kurikulum Nasional & Internasional, Reverse Engineering Kisi-Kisi PDF, Asesmen BK Psikologis, serta sinkronisasi cloud Firebase.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

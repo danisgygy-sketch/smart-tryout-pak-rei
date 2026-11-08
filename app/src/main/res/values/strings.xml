@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Smart Tryout Pak Rei</string>
+    <string name="engine_badge">Pak Rei AI Psychometric Engine v3.1</string>
+    <string name="sign_in_with_google">Masuk dengan Google</string>
+    <string name="auth_subtitle">Sinkronisasi Sesi Ujian, Grafik Radar Kemampuan, &amp; Blueprint Kisi-Kisi PDF di Cloud</string>
+    <string name="tab_evaluate">Evaluasi</string>
+    <string name="tab_history">Riwayat Cloud</string>
+    <string name="tab_blueprints">Blueprint PDF</string>
+    <string name="mode_nasional_title">Kurikulum Nasional</string>
+    <string name="mode_reverse_title">Reverse Engineering PDF</string>
+    <string name="mode_internasional_title">Standar Internasional</string>
+    <string name="mode_bk_title">Asesmen BK Psikologis</string>
+    <string name="btn_compile_card">Kompilasi Identitas &amp; Kisi-Kisi</string>
+    <string name="btn_start_ai_exam">Inisiasi Sistem Pak Rei (AI)</string>
+    <string name="btn_start_demo_exam">Coba Simulasi Cepat (Demo Instan)</string>
+    <string name="btn_finish_exam">Akhiri Sesi</string>
+    <string name="btn_sign_out">Keluar Akun</string>
+</resources>
